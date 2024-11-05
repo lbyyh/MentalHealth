@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>心理健康数据分析与预测平台 - 控制面板</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        /* 基础的表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #000;
+        }
+        tr:nth-child(even) {
+            background-color: #ddd;
+        }
+        #pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px; /* 或者任何适当的边距 */
+        }
+        #pagination button {
+            margin: 0 5px; /* 两侧留一点空间 */
+        }
+    </style>
+</head>
+
+<body>
+
+<div>
+    <!-- 数据表格 -->
+    <h3>全球心理健康数据概览</h3>
+    <table id="data-overview">
+        <!-- 自动插入表头和数据行 -->
+    </table>
+    <div id="pagination">
+        <button id="prev-page" onclick="changePage(-1)">上一页</button>
+        <span id="current-page">1</span>
+        <button id="next-page" onclick="changePage(1)">下一页</button>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;  // 当前页码，默认为第一页
+    let numRowsPerPage = 13;  //每页显示的数据行数，修改为适合你的数字
+
+    function fetchDataAndRenderTable() {
+        fetch("/user/csvData?page=" + currentPage + "&rowsPerPage=" + numRowsPerPage)
+            .then(response => response.json())
+            .then(data => {
+                var table = document.getElementById('data-overview');
+
+                //清除旧数据
+                table.innerHTML = "";
+
+                //添加标题行
+                var header = table.createTHead();
+                var titleRow = header.insertRow(0);
+                if(data.length > 0) {
+                    Object.keys(data[0]).forEach(key => {
+                        var th = document.createElement("th");
+                        th.innerHTML = key;
+                        titleRow.appendChild(th);
+                    });
+                }
+
+                //添加数据行
+                data.forEach(item => {
+                    var row = table.insertRow();
+
+                    Object.values(item).forEach(value => {
+                        var cell = row.insertCell();
+                        cell.textContent = value;
+                    });
+                });
+            });
+
+        // 更新当前页码
+        document.getElementById('current-page').innerHTML = currentPage;
+    }
+
+    // 为上一页和下一页按钮添加事件监听器
+    document.getElementById('prev-page').addEventListener('click', function() {
+        if(currentPage > 1){
+            currentPage--;
+            fetchDataAndRenderTable();
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', function() {
+        currentPage++;
+        fetchDataAndRenderTable();
+    });
+
+    //在页面加载时请求并显示第一页的数据
+    fetchDataAndRenderTable();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+mysql:
+  host: "192.168.30.59"
+  port: 3306
+  username: "health"
+  password: "dLE3xr43k4Pak22i"
+  database: "health"
+
+redis:
+  host: "192.168.30.59"
+  port: 6379
+  password: ""

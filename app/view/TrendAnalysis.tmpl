@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>心理健康数据分析平台</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: #fff;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .form-select {
+            margin: 0.5rem;
+        }
+        .chart-container {
+            background: #fff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.3rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        h5 {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<!-- NavBar -->
+<nav class="navbar navbar-light navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="#">心理健康数据分析平台</a>
+    </div>
+</nav>
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Filter Row -->
+    <div class="row align-items-center">
+        <div class="col-sm-3">
+            <label for="role" class="form-label">角色筛选</label>
+            <select id="role" class="form-select">
+                <option value="all" selected>全部</option>
+                <option value="teen">青少年</option>
+                <option value="college">大学生</option>
+                <option value="worker">社会工作者</option>
+            </select>
+        </div>
+        <div class="col-sm-3">
+            <label for="gender" class="form-label">性别筛选</label>
+            <select id="gender" class="form-select">
+                <option selected>全部</option>
+                <option value="男">男性</option>
+                <option value="女">女性</option>
+            </select>
+        </div>
+        <div class="col-sm-3">
+        </div>
+        <!-- Add more selects here -->
+    </div>
+    <hr/>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.2.0/echarts.min.js"></script>
+<div id="dashboard" class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div id="character-chart" class="chart-container">
+                <h5 class="text-center">性格类型分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('character-chart-content', 'surveys/SurveysTeenAllList', '性格类型分布图', 'character', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="character-chart-content" style="height:300px;"></div>
+            </div>
+            <div id="problem-solving-chart" class="chart-container">
+                <h5 class="text-center">问题解决方式分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('problem-solving-chart-content', 'surveys/SurveysTeenAllList', '问题解决方式分布图', 'problemSolving', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="problem-solving-chart-content" style="height:300px;"></div>
+            </div>
+            </div>
+            <div class="col-md-6">
+            <div id="loneliness-chart" class="chart-container">
+                <h5 class="text-center">孤独感分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('loneliness-chart-content', 'surveys/SurveysTeenAllList', '孤独感分布图', 'loneliness', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="loneliness-chart-content" style="height:300px;"></div>
+            </div>
+            <div id="parents-divorced-chart" class="chart-container">
+                <h5 class="text-center">父母婚姻情况分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('parents-divorced-chart-content', 'surveys/SurveysTeenAllList', '父母婚姻情况分布图', 'parentsDivorced', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="parents-divorced-chart-content" style="height:300px;"></div>
+            </div>
+            </div>
+            </div>
+                <div class="row">
+                <div class="col-md-6">
+            <div id="grade-chart" class="chart-container">
+                <h5 class="text-center">年级分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('grade-chart-content', 'surveys/SurveysCollegeAllList', '年级分布图', 'grade', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="grade-chart-content" style="height:300px;"></div>
+            </div>
+            <div id="birthplace-chart" class="chart-container">
+                <h5 class="text-center">出生地分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('birthplace-chart-content', 'surveys/SurveysCollegeAllList', '出生地分布图', 'birthplace', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="birthplace-chart-content" style="height:300px;"></div>
+            </div>
+            </div>
+                <div class="col-md-6">
+            <div id="monthlyExpense-chart" class="chart-container">
+                <h5 class="text-center">每月花费分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('monthlyExpense-chart-content', 'surveys/SurveysCollegeAllList', '每月花费分布图', 'monthlyExpense', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="monthlyExpense-chart-content" style="height:300px;"></div>
+            </div>
+            <div id="abilityToHandle-chart" class="chart-container">
+                <h5 class="text-center">自我评价的能力处理分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('abilityToHandle-chart-content', 'surveys/SurveysCollegeAllList', '自我评价的能力处理分布图', 'abilityToHandle', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="abilityToHandle-chart-content" style="height:300px;"></div>
+            </div>
+            </div>
+            </div>
+                <div class="row">
+                <div class="col-md-6">
+            <div id="age-chart" class="chart-container">
+                <h5 class="text-center">年龄分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('age-chart-content', 'surveys/SurveysWorkerAllList', '年龄分布图', 'age', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="age-chart-content" style="height:300px;"></div>
+            </div>
+            <div id="education-level-chart" class="chart-container">
+                <h5 class="text-center">教育程度分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('education-level-chart-content', 'surveys/SurveysWorkerAllList', '教育程度分布图', 'educationLevel', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="education-level-chart-content" style="height:300px;"></div>
+            </div>
+            </div>
+                <div class="col-md-6">
+            <div id="gender-chart" class="chart-container">
+                <h5 class="text-center">性别分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('gender-chart-content', 'surveys/SurveysWorkerAllList', '性别分布图', 'gender', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="gender-chart-content" style="height:300px;"></div>
+            </div>
+            <div id="marital-status-chart" class="chart-container">
+                <h5 class="text-center">婚姻状况分布
+                    <button class="btn btn-sm btn-secondary float-right" onclick="changeChartType('marital-status-chart-content', 'surveys/SurveysWorkerAllList', '婚姻状况分布图', 'maritalStatus', 'bar')">切换为柱状图</button>
+                </h5>
+                <div id="marital-status-chart-content" style="height:300px;"></div>
+            </div>
+            </div>
+    </div>
+    </div>
+
+<!-- 这里是制图的脚本，针对每个图表的内容进行处理和渲染 -->
+<script>
+
+    $('#role').change(function() {
+        var selectedRole = $('#role').val();
+        var selectedGender = $('#gender').val() !== '全部' ? $('#gender').val() : ""; // 非全部时获取性别选项
+        $('.chart-container').hide();
+
+        var surveyUrlPrefix = 'surveys/'; // 通用的请求URL前缀
+        if (selectedGender) { // 如果性别选择不为全部，修改请求URL前缀为对应性别数据的接口
+            surveyUrlPrefix += 'Surveys' + capitalize(selectedRole) + 'AllListByGender?gender=' + selectedGender;
+        } else {
+            surveyUrlPrefix += 'Surveys' + capitalize(selectedRole) + 'AllList';
+        }
+
+        switch(selectedRole) {
+            case 'teen':
+                $('#character-chart, #problem-solving-chart, #loneliness-chart, #parents-divorced-chart').show();
+                console.log("surveyUrlPrefix-----------------",surveyUrlPrefix)
+                fetchDataAndDrawChart(surveyUrlPrefix, '性格类型分布图', 'character','character-chart-content')
+                fetchDataAndDrawChart(surveyUrlPrefix, '问题解决方式分布图', 'problemSolving', 'problem-solving-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '孤独感分布图', 'loneliness', 'loneliness-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '父母婚姻情况分布图', 'parentsDivorced', 'parents-divorced-chart-content');
+
+                break;
+
+            case 'college':
+                $('#grade-chart, #birthplace-chart, #monthlyExpense-chart, #abilityToHandle-chart').show();
+
+                fetchDataAndDrawChart(surveyUrlPrefix, '年级分布图', 'grade', 'grade-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '出生地分布图', 'birthplace', 'birthplace-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '每月花费分布图', 'monthlyExpense', 'monthlyExpense-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '自我评价的能力处理分布图', 'abilityToHandle', 'abilityToHandle-chart-content');
+
+                break;
+
+            case 'worker':
+                $('#age-chart, #education-level-chart, #gender-chart, #marital-status-chart').show();
+
+                fetchDataAndDrawChart(surveyUrlPrefix, '年龄分布图', 'age', 'age-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '教育程度分布图', 'educationLevel', 'education-level-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '性别分布图', 'gender', 'gender-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '婚姻状况分布图', 'maritalStatus', 'marital-status-chart-content');
+
+                break;
+
+            case 'all':
+                $('.chart-container').show();
+
+                // 青少年相关图表的数据获取和绘制
+                fetchDataAndDrawChart(surveyUrlPrefix, '性格类型分布图', 'character','character-chart-content')
+                fetchDataAndDrawChart(surveyUrlPrefix, '问题解决方式分布图', 'problemSolving', 'problem-solving-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '孤独感分布图', 'loneliness', 'loneliness-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '父母婚姻情况分布图', 'parentsDivorced', 'parents-divorced-chart-content');
+
+                // 大学生相关图表的数据获取和绘制
+                fetchDataAndDrawChart(surveyUrlPrefix, '年级分布图', 'grade', 'grade-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '出生地分布图', 'birthplace', 'birthplace-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '每月花费分布图', 'monthlyExpense', 'monthlyExpense-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '自我评价的能力处理分布图', 'abilityToHandle', 'abilityToHandle-chart-content');
+
+                // 社会工作者相关图表的数据获取和绘制
+                fetchDataAndDrawChart(surveyUrlPrefix, '年龄分布图', 'age', 'age-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '教育程度分布图', 'educationLevel', 'education-level-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '性别分布图', 'gender', 'gender-chart-content');
+                fetchDataAndDrawChart(surveyUrlPrefix, '婚姻状况分布图', 'maritalStatus', 'marital-status-chart-content');
+
+                break;
+        }
+    });
+    function capitalize(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    $('#gender').change(function() {
+        $('#role').trigger('change');
+    });
+
+    // 重新处理数据，处理为饼图和柱状图都能读取的数据格式
+    function preprocessData(data, attribute) {
+        const frequencyCount = {};
+        data.forEach(item => {
+            const key = item[attribute];
+            if(key) {
+                frequencyCount[key] ? frequencyCount[key]++ : frequencyCount[key] = 1;
+            }
+        });
+
+        return Object.entries(frequencyCount).map(([name, value]) => ({ name, value }));
+    }
+
+    // 在按钮添加点击事件
+    function changeChartType(chartId, url, title, attribute) {
+        // 获取图表实例
+        var chart = echarts.getInstanceByDom(document.getElementById(chartId));
+        // 获取图表的当前类型（饼图或柱状图）
+        var currentType = chart.getOption().series[0].type;
+        // 切换图表类型：如果当前是饼图，更改为柱状图，否则更改为饼图
+        var newType = currentType === 'pie' ? 'bar' : 'pie';
+        fetchDataAndDrawChart(url, title, attribute, chartId, newType);
+    }
+
+    function fetchDataAndDrawChart(url, title, attribute, chartId, chartType = 'pie') {
+        fetch(url)
+            .then(resp => resp.json())
+            .then(data => {
+                const chartData = preprocessData(data, attribute);
+                const chart = echarts.init(document.getElementById(chartId));
+                chart.setOption(supplyOptions(title, chartData, attribute, chartType === 'bar'));
+            });
+    }
+
+    function supplyOptions(title, data, attribute, isBar = false) {
+        if(!isBar) {
+            return {
+                title: {
+                    text: title,
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data: data.map(item => item.name)
+                },
+                series: [
+                    {
+                        name: title,
+                        type: 'pie',
+                        radius: '50%',
+                        center: ['50%', '50%'],
+                        data,
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    },
+                ],
+                color: ['#5373e5','#00c5dc','#ffb822', '#d2555a', '#273c75']
+            };
+        } else {
+            return {
+                title: {
+                    text: title,
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    formatter: '{a} <br/>{b} : {c}'
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: true,
+                    data: data.map(item => item.name),
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    boundaryGap: [0, 0.01]
+                },
+                series: [
+                    {
+                        name: title,
+                        type: 'bar',
+                        barWidth: '60%',
+                        data,
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(
+                                0, 0, 0, 1,
+                                [
+                                    {offset: 0, color: '#83bff6'},
+                                    {offset: 0.5, color: '#188df0'},
+                                    {offset: 1, color: '#188df0'}
+                                ]
+                            )
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    },
+                ]
+            };
+        }
+    }
+
+</script>
+</body>
+</html>

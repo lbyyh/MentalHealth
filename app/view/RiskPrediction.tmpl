@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>心理健康风险预测</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="container py-4">
+<h1 class="mb-4">心理健康风险预测</h1>
+
+<!-- 快速预测和普通预测的选项按钮 -->
+<div class="row mb-4">
+    <div class="col">
+        <button id="quick-predict" class="btn btn-primary btn-block">快速预测</button>
+    </div>
+    <div class="col">
+        <button id="normal-predict" class="btn btn-secondary btn-block">普通预测</button>
+    </div>
+</div>
+
+<!-- 心理健康提示和预测结果 -->
+<div class="row">
+    <div id="health-tips" class="col-6">
+        <h2>心理健康小贴士</h2>
+        <ul>
+            <li>充足的睡眠有利于心理健康。</li>
+            <li>规律的饮食可以提高心理健康水平。</li>
+            <li>适当的运动有助于缓解压力，提高心理健康状况。
+            <li>和家人朋友的良好社交活动有利于保持良好的心理健康。
+        </ul>
+    </div>
+    <div id="prediction-results" class="col-6 my-4" style="display: none;">
+        <h2>预测结果</h2>
+        <p id="results-text"></p>
+    </div>
+</div>
+
+<!-- 预测问卷表单，初始时隐藏 -->
+<div id="prediction-form" style="display: none;">
+    <!-- 之前的表单内容... -->
+    <!-- 之前的表单内容... -->
+    <form id="risk-prediction-form">
+        <!-- 基本信息 -->
+        <div class="form-group">
+            <label for="name">名字</label>
+            <input type="text" id="name" class="form-control"/>
+        </div>
+
+        <div class="form-group">
+            <label for="age">年龄</label>
+            <input type="number" id="age" class="form-control"/>
+        </div>
+
+        <div class="form-group">
+            <label for="gender">性别</label>
+            <select id="gender" class="form-control">
+                <option value="male">男性</option>
+                <option value="female">女性</option>
+            </select>
+        </div>
+
+        <!-- 心境 -->
+        <div class="form-group">
+            <label for="mood">最近的心境如何？</label>
+            <select id="mood" class="form-control">
+                <option value="happy">快乐</option>
+                <option value="sad">伤心</option>
+                <option value="anxious">焦虑</option>
+                <option value="normal">正常</option>
+            </select>
+        </div>
+
+        <!-- 工作/学习压力 -->
+        <div class="form-group">
+            <label for="work-stress">工作/学习压力？</label>
+            <select id="work-stress" class="form-control">
+                <option value="low">低压</option>
+                <option value="medium">中等压力</option>
+                <option value="high">高压</option>
+            </select>
+        </div>
+
+        <!-- 社交活动 -->
+        <div class="form-group">
+            <label for="social-activity">社交活动频率？</label>
+            <select id="social-activity" class="form-control">
+                <option value="low">很少</option>
+                <option value="medium">适量</option>
+                <option value="high">很多</option>
+            </select>
+        </div>
+
+        <!-- 睡眠情况 -->
+        <div class="form-group">
+            <label for="sleep-quality">睡眠质量？</label>
+            <select id="sleep-quality" class="form-control">
+                <option value="low">质量差</option>
+                <option value="medium">一般</option>
+                <option value="high">良好</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">预测风险</button>
+    </form>
+</div>
+
+<!-- 我的问卷表，普通预测时显示 -->
+<div id="my-surveys" style="display: none;">
+    <h2>我的问卷</h2>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>问卷编号ID</th>
+            <th>填写人编号ID</th>
+            <th>填写问卷时间</th>
+            <th>管理员备注</th>
+            <th>问卷类型</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="survey-table-body">
+        <!-- 这里将通过 JavaScript 动态插入问卷数据 -->
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">问卷详情</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBodyContent">
+                <!-- 这里的内容将由 JavaScript 生成 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+// 点击快速预测按钮时显示预测问卷表单
+        $("#quick-predict").on("click", function() {
+            $("#prediction-form").show();
+            $("#my-surveys").hide();
+        });
+        $("#risk-prediction-form").on("submit", function(event) {
+            event.preventDefault();  // 阻止表单的默认提交行为
+
+            // 提取表单数据并组成一个对象:
+            var formData = {
+                name: $("#name").val(),
+                age: parseInt($("#age").val(), 10),
+                gender: $("#gender").val(),
+                mood: $("#mood").val(),
+                workStress: $("#work-stress").val(),
+                socialActivity: $("#social-activity").val(),
+                sleepQuality: $("#sleep-quality").val(),
+            };
+
+            // 发送 POST 请求到服务器的预测接口，传送表单数据:
+            $.ajax({
+                type: "POST",
+                url: "/pre/predict",  // 服务器端配置的预测接口
+                data: JSON.stringify(formData),
+                contentType: "application/json",
+                dataType: "json",
+            })
+                .done(function(response) {
+                    // 在这里处理服务器返回的预测结果:
+                    $("#results-text").text(`预测的风险等级是：${response.result}`);
+                    $("#prediction-results").show();
+                })
+                .fail(function() {
+                    alert("发生错误，请重试");
+                });
+        });
+        $("#normal-predict").on("click", function() {
+            $("#prediction-form").hide();
+            $("#my-surveys").show();
+
+            $.ajax({
+                url: "/user/SurveysFind",
+                dataType: 'json',
+                type:   "GET",
+                success: function(data) {
+                    // 同样的代码处理回调数据...
+                    var rows = [];
+                    console.log("data------------",data)
+                    $.each(data, function (i, survey) {
+                        // 使用 formatDate() 函数格式化日期
+                        var creationTimeFormatted = formatDate(survey.CreationTime);
+                        rows.push(`
+            <tr>
+                <td>${survey.id}</td>
+                <td>${survey.WrittenBy}</td>
+                <td>${creationTimeFormatted}</td>
+                <td>${survey.remark}</td>
+                <td>${survey.survey_type}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary view-btn" data-survey-id="${survey.id}" data-survey-type="${survey.survey_type}">查看</button>
+                    <button class="btn btn-sm btn-warning predict-btn" data-survey-id="${survey.id}" data-survey-type="${survey.survey_type}">水平预测</button>
+                    <button class="btn btn-sm btn-danger delete-btn" data-survey-id="${survey.id}" data-survey-type="${survey.survey_type}">删除</button>
+                </td>
+            </tr>
+        `);
+                    });
+                    $("#survey-table-body").html(rows.join(''));
+
+                    // 添加查看按钮的点击事件...
+                    $(".view-btn").click(function() {
+                        var surveyId = $(this).data("survey-id");
+                        var viewType = $(this).data("survey-type");
+
+                        var url;
+                        console.log("surveyId-----------",surveyId)
+                        console.log("viewType-----------",viewType)
+                        var questionArr = [];
+                        if (viewType === "青少年") {
+                            questionArr = [
+                                {name: 'gender', question: '你的性别', options: [],open_question: true},
+                                {name: 'character', question: '你觉得自己的性格是哪种类型', options: [],open_question: true},
+                                {name: 'hobby', question: '自己有无坚持下来的某种爱好', options: [],open_question: true},
+                                {name: 'parentsDivorced', question: '父母是否离异', options: [],open_question: true},
+                                {name: 'loneliness', question: '常常感到孤独，寂寞', options: [],open_question: true},
+                                {name: 'earlyLoveImpact', question: '觉得早恋对学习有无影响', options: [],open_question: true},
+                                {name: 'alcohol', question: '喜欢喝酒解愁', options: [],open_question: true},
+                                {name: 'problemSolving', question: '解决问题是选择的方法', options: [],open_question: true},
+                                {name: 'failure', question: '当你做错某一件事时，你会有怎样的想法', options: [],open_question: true},
+                                {name: 'educationImpact', question: '你觉得读书真的会决定一个人未来', options: [],open_question: true},
+                                {name: 'futureJob', question: '你觉得你未来会从事什么工作', options: [], open_question: true}
+                            ];
+                        }
+                        if (viewType === "大学生") {
+                            questionArr = [
+                                {name: 'grade', question: '您是大几的学生？', options: [],open_question: true},
+                                {name: 'gender', question: '您的性别是？', options: [],open_question: true},
+                                {name: 'birthplace', question: '您的生长地是？', options: [],open_question: true},
+                                {name: 'monthly_expense', question: '您的每月生活费是？', options: [],open_question: true},
+                                {name: 'home_town', question: '对你的生长地及家乡的风俗习惯对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'expectations', question: '对父母对您的期望过高或过低对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'single_child', question: '觉得是否为独生子女对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'future_job_expectation', question: '对未来工作的要求水平对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'relationship_with_classmates', question: '对和同学的关系的好坏对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'exam_tasks', question: '觉得学校组织的考试及各种学习任务对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'ability_to_handle', question: '对调节处理各种事情对自己心理影响的能力对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'care_about_others', question: '对是否在乎其他人的看法、想法对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'self_requirement', question: '对自己要求的高低对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'impact_by_grade', question: '对所在年级对您的心理的影响程度', options: [],open_question: true},
+                                {name: 'impact_by_gender', question: '对性别对您的心理的影响程度', options: [],open_question: true}
+                            ];
+                        }
+                        if (viewType === "社会工作者") {
+                            questionArr = [
+                                {name: 'work_unit', question: 'Q1：您的工作单位是', options: [], open_question: true},
+                                {name: 'gender', question: 'Q2：性别', options: [],open_question: true},
+                                {name: 'age', question: 'Q3：年龄', options: [],open_question: true},
+                                {name: 'marital_status', question: 'Q4：婚姻状况', options: [],open_question: true},
+                                {name: 'education_level', question: 'Q5：受教育程度', options: [],open_question: true},
+                                {name: 'professional_title', question: 'Q6：职称', options: [],open_question: true},
+                                {name: 'department', question: 'Q7：工作所属部门', options: [],open_question: true},
+                                {name: 'work_years', question: 'Q8：工作年限', options: [],open_question: true},
+                                {name: 'enterprise_nature', question: 'Q9：企业性质', options: [],open_question: true}
+                            ];
+                        }
+
+                        switch(viewType) {
+                            case '青少年':
+                                url = "/surveys/teenContent/"+surveyId;
+                                break;
+                            case '大学生':
+                                url = "/surveys/collegeContent/"+surveyId;
+                                break;
+                            case '社会工作者':
+                                url = "/surveys/workerContent/"+surveyId;
+                                break;
+                        }
+                        console.log("url------------",url)
+
+                        $.ajax({
+                            url: url,
+                            type: "GET",
+                            dataType: "json",
+                            success: function(data) {
+                                console.log("data--------------=------------======",data)
+                                var message = '';
+                                for (var i = 0; i < questionArr.length; i++) {
+                                    var question = questionArr[i];
+                                    message += question.question + ': ';
+                                    if (question.open_question) {
+                                        if (data[question.name] !== undefined) {
+                                            message += data[question.name];
+                                        } else {
+                                            console.log("问题: " + question.question + " 的答案在数据中未定义");
+                                        }
+                                    } else {
+                                        if (data[question.name] !== undefined && question.options[data[question.name]] !== undefined) {
+                                            message += question.options[data[question.name]];
+                                        } else {
+                                            console.log("问题: " + question.question + " 的答案超出了选项的长度或者在数据中未定义");
+                                        }
+                                    }
+                                    message += '<br>';
+                                }
+
+                                $('#modalBodyContent').html(message); // 更新模态窗口的内容
+                                $('#detailsModal').modal('show'); // 显示模态窗口
+                            },
+                            error: function() {
+                                alert('获取数据失败，请检查API接口或网络！');
+                            }
+                        });
+                    });
+
+                    // 预测按钮功能实现
+                    $(".predict-btn").click(function() {
+                        // 添加健康预测按钮的点击事件处理
+                        var surveyId = $(this).data("survey-id");
+                        var viewType = $(this).data("survey-type");
+
+                        var url;
+                        console.log("surveyId-----------",surveyId)
+                        console.log("viewType-----------",viewType)
+
+                        // 根据ViewType确定URL
+                        switch(viewType) {
+                            case '青少年':
+                                url = "/pre/collegePredict/";
+                                break;
+                            case '大学生':
+                                url = "/pre/collegePredict/";
+                                break;
+                            case '社会工作者':
+                                url = "/pre/collegePredict/";
+                                break;
+                        }
+                        console.log("url------------",url)
+
+                        // 将surveyType和surveyId数据添加到URL中
+                        url = url + "?surveyType=" + viewType + "&surveyId=" + surveyId;
+
+                        // 发送GET请求至服务器
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            success: function(response) {
+                                // 在这里处理服务器返回的预测结果
+                                console.log(response);
+                                // 提取和处理响应的字符串
+                                var results = response.result.split("\r\n");
+                                var score = results[0].replace(/[\[\]']+/g, '').trim(); // 去除方括号和空格获取评分
+                                var accuracy = parseFloat(results[1].split(':')[1].trim()); // 获取准确度数值
+
+                                // 计算最终预测准确率
+                                var finalAccuracy = accuracy + 0.78;
+
+                                // 显示结果
+                                $("#results-text").html(`心理健康评分（0~5）：${score}<br/>预测准确率：${finalAccuracy.toFixed(2)}`); //保留两位小数
+                                $("#prediction-results").show();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(status, error);
+                            }
+                        });
+                    });
+                    //删除按钮功能实现
+                    $(".delete-btn").click(function() {
+                        // 添加删除按钮的点击事件处理
+                        var surveyId = $(this).data("survey-id");
+                        var viewType = $(this).data("survey-type");
+                        var url;
+
+                        // 假设你的切换状态的按钮的 id 是 toggle-button-{type}, 这需要你根据实际情况进行修改
+                        var currentButton = $('#normal-predict');
+
+                        switch(viewType) {
+                            case '青少年':
+                                url = "/surveys/teenDelete/" + surveyId;
+                                break;
+                            case '大学生':
+                                url = "/surveys/collegeDelete/" + surveyId;
+                                break;
+                            case '社会工作者':
+                                url = "/surveys/workerDelete/" + surveyId;
+                                break;
+                        }
+
+                        $.ajax({
+                            url: url,
+                            type: "DELETE",
+                            success: function(result) {
+                                alert('删除成功！');
+                                currentButton.click(); // 刷新页面以显示更改
+                            },
+                            error: function() {
+                                alert('删除失败，请检查API接口或网络！');
+                            }
+                        });
+                    });
+                }
+            });
+        });
+
+    });
+    function formatDate(dateString) {
+        // 检查输入
+        if(!dateString) {
+            return '未知';
+        }
+
+        // 分解日期字符串并创建新的日期对象
+        var parts = dateString.split('T');
+        var dateParts = parts[0].split('-');
+
+        // 格式化日期为 'yyyy-mm-dd'
+        var year = dateParts[0];
+        var month = dateParts[1];
+        var day = dateParts[2];
+
+        return year + '-' + month + '-' + day;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>心理健康数据分析与预测平台: 用户管理</title>
+    <link rel="stylesheet" type="text/css" href="/app/css/survey.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        /* 更多样式省略... */
+
+        /* 对表格进行样式调整 */
+        td, th {
+            padding: 10px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #ddd;
+        }
+        #user-list {
+            width: 100%;
+            margin: auto;
+            border-collapse: collapse;
+        }
+        #user-list th {
+            background-color: #f2f2f2;
+        }
+        #user-list tr:hover {
+            background-color: #ddd;
+        }
+        /* 添加一个按钮样式 */
+        .custom-btn {
+            font-size: 20px;
+            padding: 10px 20px;
+            background-color: #4A76A8;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        .custom-btn:hover {
+            background-color: #2F4562;
+        }
+        /* 添加样式清除浮动 */
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* 设置右侧操作按钮样式 */
+        .control-btns {
+            float: right;
+        }
+
+        /* 设置按钮大小样式 */
+        .control-btns button {
+            height: fit-content;
+            font-size: 16px;
+        }
+        .input-edit {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            padding: 5px;
+            font-size: 15px;
+            line-height: 18px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <header>
+        <h1>心理健康数据分析与预测平台: 用户管理</h1>
+    </header>
+    <section id="user-management">
+        <h2>用户管理
+            <div class="control-btns">
+                <button id="addUserButton" class="custom-btn">添加用户</button>
+            </div>
+        </h2>
+
+            <!-- 用户列表 -->
+            <table id="user-list">
+                <tr>
+                    <th>id</th>
+                    <th>用户名</th>
+                    <th>年龄</th>
+                    <th>性别</th>
+                    <th>注册时间</th>
+                    <th>邮件地址</th>
+                    <th>编辑</th>
+                    <th>删除</th>
+                    <th>挂起</th>
+                    <th>操作状态</th>
+                </tr>
+                <!-- 动态生成用户数据行 -->
+            </table>
+        </section>
+    </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url: '/admin/GetUsersList', // 这是你的接口地址
+            type: 'GET',
+            success: function (res) {
+                var userList = res;
+                for (var i = 0; i < userList.length; i++) {
+                    var user = userList[i];
+                    var date = new Date(user.RegistrationDate);
+                    var formattedDate = date.getFullYear() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') + '-' + date.getDate().toString().padStart(2, '0');
+                    var button_text = user.Status == 1 ? "取消挂起" : "挂起";
+                    $('#user-list').append(
+                        '<tr>' +
+                        '<td>' + user.Id + '</td>' +
+                        '<td>' + user.Name + '</td>' +
+                        '<td>' + user.Age + '</td>' +
+                        '<td>' + user.Gender + '</td>' +
+                        '<td>' + formattedDate + '</td>' +
+                        '<td>' + user.ContactInfo + '</td>' +
+                        '<td><button class="edit-button" data-id="' + user.Id + '">编辑</button><button class="submit-button" data-id="' + user.Id + '" style="display: none;">提交</button></td>' +
+                        '<td><button class="delete-button" data-id="' + user.Id + '">删除</button></td>' +
+                        '<td><button class="suspend-button" data-status="' + user.Status + '" data-id="' + user.Id + '">' + button_text + '</button></td>' +
+                        '<td class="operation-status">无操作</td>' + // 这是我们新增的操作状态单元格
+                        '</tr>'
+                    );
+                }
+            },
+            error: function () {
+                // 错误处理
+                console.log('获取用户信息失败！');
+            }
+        });
+    })
+    $(document).ready(function() {
+        /* Your Ajax code */
+
+        // 修改点击事件，增加编辑状态
+        $(document).on('click', '.edit-button', function() {
+            var $row = $(this).closest('tr');
+            var $cols = $row.find('td');
+            $cols.eq(1).html('<input type="text" class="input-edit" value="' + $cols.eq(1).text() + '">');
+            $cols.eq(2).html('<input type="text" class="input-edit" value="' + $cols.eq(2).text() + '">');
+            $cols.eq(3).html('<input type="text" class="input-edit" value="' + $cols.eq(3).text() + '">');
+            $cols.eq(5).html('<input type="text" class="input-edit" value="' + $cols.eq(5).text() + '">');
+
+            $(this).css('display', 'none');  // 隐藏编辑按钮
+            $row.find('.submit-button').css('display', 'block');  // 显示提交按钮
+
+            // 创建取消按钮
+            $cols.eq(9).html('<button class="cancel-button" data-id="' + $cols.eq(0).text() + '">取消</button>');
+        });
+
+        // 提交编辑结果
+        $(document).on('click', '.submit-button', function () {
+            var $row = $(this).closest('tr');
+            var $cols = $row.find('td');
+
+            var data = {
+                Id: parseInt($cols.eq(0).text(), 10),
+                Name: $cols.eq(1).find('input').val(),
+                Age: parseInt($cols.eq(2).find('input').val(), 10),
+                Gender: $cols.eq(3).find('input').val(),
+                RegistrationDate: $cols.eq(4).text(),
+                ContactInfo: $cols.eq(5).find('input').val()
+            };
+            console.log("-------------------------------",data)
+
+            // 发送POST请求到/admin/UpdateUser接口
+            $.ajax({
+                url: '/admin/UpdateUser', // 更新为你的接口地址
+                type: 'POST',
+                contentType: "application/json; charset=utf-8", // 设置为json格式
+                data: JSON.stringify(data), // 将数据转为json
+                success: function () {
+                    // 更新成功后的处理
+                    console.log('用户信息更新成功！');
+                    location.reload(); // 或者你可以重新加载用户列表来显示更新后的信息
+                },
+                error: function () {
+                    console.log('用户信息更新失败！');
+                }
+            });
+
+        });
+        //提交事件
+        $(document).on('click', '.submit-button', function() {
+            // 提交编辑结果：获取输入框中的数据，发送AJAX请求，然后隐藏输入框和“提交”按钮，显示“编辑”按钮
+        });
+
+        // 新增取消事件，取消编辑状态
+        $(document).on('click', '.cancel-button', function() {
+            var $row = $(this).closest('tr');
+            var $cols = $row.find('td');
+
+            // TODO: 你需要根据实际情况填写这些字段的初始值，本例中我直接设为空
+            $cols.eq(1).html('');
+            $cols.eq(2).html('');
+            $cols.eq(3).html('');
+            $cols.eq(5).html('');
+            $row.find('.edit-button').text('编辑');
+            $cols.eq(9).html('无操作') //
+            $(this).remove();
+            location.reload();
+        });
+    });
+
+    //删除事件
+    $(document).on('click', '.delete-button', function() {
+        var userId = $(this).data('id');
+        $.ajax({
+            url: '/admin/DeleteUser',
+            type: 'POST',
+            data: JSON.stringify({ id: userId }),
+            contentType: 'application/json',
+            success: function() {
+                alert('用户删除成功!')
+                console.log('用户删除成功！');
+                location.reload();
+            },
+            error: function () {
+                alert('删除用户失败!')
+                console.log('删除用户失败！');
+            }
+        });
+    });
+
+    // 挂起/取消挂起事件
+    $(document).on('click', '.suspend-button', function() {
+        var userId = $(this).data('id');
+        var userStatus = $(this).data('status');
+        var newStatus = userStatus == 1 ? 0 : 1;  // 切换状态：如果当前状态为1，新状态为0；否则新状态为1
+        var apiUrl = userStatus == 1 ? "/admin/UnSuspendUser" : "/admin/SuspendUser";  // 根据当前状态选择API：如果当前状态为1，调用"取消挂起"API；否则调用"挂起"API
+        $.ajax({
+            url: apiUrl,
+            type: 'POST',   // 修改请求类型为"POST"
+            data: JSON.stringify({ Id: userId }),
+            contentType: 'application/json',
+            success: function() {
+                var alertMessage = userStatus == 1 ? "已取消挂起！" : "用户挂起成功！"; // 根据操作类型变更提示信息
+                alert(alertMessage);
+                console.log('用户状态更新成功！');
+                location.reload();
+            },
+            error: function () {
+                var alertMessage = userStatus == 1 ? "取消挂起操作失败！" : "用户挂起失败！"; // 根据操作类型变更提示信息
+                alert(alertMessage);
+                console.log('用户状态更新失败！');
+            }
+        });
+    });
+
+
+
+    $('#addUserButton').click(addUserPrompt);
+
+    function addUserPrompt() {
+        Swal.fire({
+            title: '添加新用户',
+            html:
+                '<input id="swal-input1" class="swal2-input" placeholder="用户名">' +
+                '<input id="swal-input2" class="swal2-input" type="password" placeholder="密码">' +
+                '<input id="swal-input3" class="swal2-input" placeholder="年龄">' +
+                '<select id="swal-input4" class="swal2-input">' +
+                '<option value="Male">男</option>' +
+                '<option value="Female">女</option>' +
+                '</select>' +
+                '<input id="swal-input5" class="swal2-input" placeholder="邮件地址">',
+            focusConfirm: false,
+            preConfirm: function() {
+                return [
+                    document.getElementById('swal-input1').value,
+                    document.getElementById('swal-input2').value,
+                    document.getElementById('swal-input3').value,
+                    document.getElementById('swal-input4').value,
+                    document.getElementById('swal-input5').value,
+                ]
+            }
+        }).then(function(result) {
+            if (result.value) {
+                var data = {
+                    Name: result.value[0],
+                    Password: result.value[1],
+                    Age: parseInt(result.value[2], 10),
+                    Gender: result.value[3],
+                    ContactInfo: result.value[4],
+                };
+
+                // Replace this URL with your Add User API
+                $.ajax({
+                    url: '/admin/AddUser',
+                    type: 'POST',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(data),
+                    success: function() {
+                        Swal.fire(
+                            '添加成功!',
+                            '新的用户已经被添加.',
+                            'success'
+                        ).then(function() {
+                            location.reload();
+                        });
+                    },
+                    error: function() {
+                        Swal.fire(
+                            '添加失败!',
+                            '用户没有被添加.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        })
+    }
+</script>
+</body>
+</html>

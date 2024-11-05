@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>心理健康数据分析与预测平台: 问卷管理</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+</head>
+<body>
+<div class="container my-4">
+    <h1 class="text-center mb-3">心理健康数据分析与预测平台: 问卷管理</h1>
+    <div class="btn-group mb-2" role="group">
+        <button id="btn-teen" type="button" class="btn btn-primary">青少年</button>
+        <button id="btn-college" type="button" class="btn btn-secondary">大学生</button>
+        <button id="btn-worker" type="button" class="btn btn-success">社会工作者</button>
+    </div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>问卷类型</th>
+            <th>填写问卷人</th>
+            <th>问卷填写时间</th>
+            <th>备注</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="survey-list">
+        <!-- 动态生成问卷列表信息 -->
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">问卷详情</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBodyContent">
+                <!-- 这里的内容将由 JavaScript 生成 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function renderSurveysList(type) {
+        $.ajax({
+            url: "/surveys/Surveys"+type+"List",
+            type: "GET",
+            dataType: "json",
+            success: function(data) {
+                var html = '';
+                for (var i = 0; i < data.length; i++) {
+                    let formattedDate = data[i].CreationTime.split('+')[0].replace('T', ' ');
+                    let remark = data[i].Remark || '无'; //如果不存在备注信息，将显示为 '无'
+                    html += `<tr>
+                    <td>${data[i].id}</td>
+                    <td>${type}</td>
+                    <td>${data[i].WrittenBy}</td>
+                    <td>${formattedDate}</td>
+                    <td>${remark}</td>
+                    <td>
+                        <button id='${type}-${data[i].id}' class="btn btn-primary btn-sm mx-1 viewButton">查看</button>
+                        <button id='remark-${type}-${data[i].id}' class="btn btn-secondary btn-sm mx-1">备注</button>
+                        <button id='delete-${type}-${data[i].id}' class="btn btn-danger btn-sm mx-1 deleteButton">删除</button>
+                    </td>
+                 </tr>`;
+
+                }
+                $('#survey-list').html(html);
+
+                $(".viewButton").click(function() {
+                    var splitId = this.id.split('-');
+                    var viewType = splitId[0];
+                    var viewId = splitId[1];
+                    var url;
+
+                    var questionArr = [];
+                    if (viewType === "Teen") {
+                        questionArr = [
+                            {name: 'gender', question: '你的性别', options: [],open_question: true},
+                            {name: 'character', question: '你觉得自己的性格是哪种类型', options: [],open_question: true},
+                            {name: 'hobby', question: '自己有无坚持下来的某种爱好', options: [],open_question: true},
+                            {name: 'parentsDivorced', question: '父母是否离异', options: [],open_question: true},
+                            {name: 'loneliness', question: '常常感到孤独，寂寞', options: [],open_question: true},
+                            {name: 'earlyLoveImpact', question: '觉得早恋对学习有无影响', options: [],open_question: true},
+                            {name: 'alcohol', question: '喜欢喝酒解愁', options: [],open_question: true},
+                            {name: 'problemSolving', question: '解决问题是选择的方法', options: [],open_question: true},
+                            {name: 'failure', question: '当你做错某一件事时，你会有怎样的想法', options: [],open_question: true},
+                            {name: 'educationImpact', question: '你觉得读书真的会决定一个人未来', options: [],open_question: true},
+                            {name: 'futureJob', question: '你觉得你未来会从事什么工作', options: [], open_question: true}
+                        ];
+                    }
+                    if (viewType === "College") {
+                        questionArr = [
+                            {name: 'grade', question: '您是大几的学生？', options: [],open_question: true},
+                            {name: 'gender', question: '您的性别是？', options: [],open_question: true},
+                            {name: 'birthplace', question: '您的生长地是？', options: [],open_question: true},
+                            {name: 'monthly_expense', question: '您的每月生活费是？', options: [],open_question: true},
+                            {name: 'home_town', question: '对你的生长地及家乡的风俗习惯对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'expectations', question: '对父母对您的期望过高或过低对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'single_child', question: '觉得是否为独生子女对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'future_job_expectation', question: '对未来工作的要求水平对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'relationship_with_classmates', question: '对和同学的关系的好坏对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'exam_tasks', question: '觉得学校组织的考试及各种学习任务对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'ability_to_handle', question: '对调节处理各种事情对自己心理影响的能力对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'care_about_others', question: '对是否在乎其他人的看法、想法对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'self_requirement', question: '对自己要求的高低对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'impact_by_grade', question: '对所在年级对您的心理的影响程度', options: [],open_question: true},
+                            {name: 'impact_by_gender', question: '对性别对您的心理的影响程度', options: [],open_question: true}
+                        ];
+                    }
+                    if (viewType === "Worker") {
+                        questionArr = [
+                            {name: 'work_unit', question: 'Q1：您的工作单位是', options: [], open_question: true},
+                            {name: 'gender', question: 'Q2：性别', options: [],open_question: true},
+                            {name: 'age', question: 'Q3：年龄', options: [],open_question: true},
+                            {name: 'marital_status', question: 'Q4：婚姻状况', options: [],open_question: true},
+                            {name: 'education_level', question: 'Q5：受教育程度', options: [],open_question: true},
+                            {name: 'professional_title', question: 'Q6：职称', options: [],open_question: true},
+                            {name: 'department', question: 'Q7：工作所属部门', options: [],open_question: true},
+                            {name: 'work_years', question: 'Q8：工作年限', options: [],open_question: true},
+                            {name: 'enterprise_nature', question: 'Q9：企业性质', options: [],open_question: true}
+                        ];
+                    }
+
+                    switch(viewType) {
+                        case 'Teen':
+                            url = "/surveys/teenContent/"+viewId;
+                            break;
+                        case 'College':
+                            url = "/surveys/collegeContent/"+viewId;
+                            break;
+                        case 'Worker':
+                            url = "/surveys/workerContent/"+viewId;
+                            break;
+                    }
+
+                    $.ajax({
+                        url: url,
+                        type: "GET",
+                        dataType: "json",
+                        success: function(data) {
+                            console.log("data--------------=------------======",data)
+                            var message = '';
+                            for (var i = 0; i < questionArr.length; i++) {
+                                var question = questionArr[i];
+                                message += question.question + ': ';
+                                if (question.open_question) {
+                                    if (data[question.name] !== undefined) {
+                                        message += data[question.name];
+                                    } else {
+                                        console.log("问题: " + question.question + " 的答案在数据中未定义");
+                                    }
+                                } else {
+                                    if (data[question.name] !== undefined && question.options[data[question.name]] !== undefined) {
+                                        message += question.options[data[question.name]];
+                                    } else {
+                                        console.log("问题: " + question.question + " 的答案超出了选项的长度或者在数据中未定义");
+                                    }
+                                }
+                                message += '<br>';
+                            }
+
+                            $('#modalBodyContent').html(message); // 更新模态窗口的内容
+                            $('#detailsModal').modal('show'); // 显示模态窗口
+                        },
+                        error: function() {
+                            alert('获取数据失败，请检查API接口或网络！');
+                        }
+                    });
+                });
+
+                $(".btn-danger").click(function() {
+                    var splitId = this.id.split('-');
+                    var deleteType = splitId[1]; // 修改此处，将索引从0修改为1
+                    var deleteId = splitId[2]; // 修改此处，将索引从1修改为2
+                    var url;
+
+                    // 假设你的切换状态的按钮的 id 是 toggle-button-{type}, 这需要你根据实际情况进行修改
+                    var currentButton = $('#btn-' + deleteType.toLowerCase());
+
+                    switch(deleteType) {
+                        case 'Teen':
+                            url = "/surveys/teenDelete/" + deleteId;
+                            break;
+                        case 'College':
+                            url = "/surveys/collegeDelete/" + deleteId;
+                            break;
+                        case 'Worker':
+                            url = "/surveys/workerDelete/" + deleteId;
+                            break;
+                    }
+
+                    $.ajax({
+                        url: url,
+                        type: "DELETE",
+                        success: function(result) {
+                            alert('删除成功！');
+                            currentButton.click(); // 刷新页面以显示更改
+                        },
+                        error: function() {
+                            alert('删除失败，请检查API接口或网络！');
+                        }
+                    });
+                });
+
+                $("#survey-list").off('click', '.btn-secondary').on('click', '.btn-secondary', function()  {
+                    var remarks = prompt("请添加您的备注：");
+
+                    var btnId = $(this).attr('id');
+                    var splitId = btnId.split('-');
+                    var type = splitId[1];
+                    var id = splitId[2];
+                    var url;
+
+                    //你应该用 'type' 变量来获取当前按钮
+                    var currentButton = $('#btn-' + type.toLowerCase());
+                    console.log("currentButton--------------------",currentButton)
+                    // 根据问卷类型设置请求的 URL
+                    switch(type) {
+                        case 'Teen':
+                            url = "/surveys/teenRemarkAdd/" + id;
+                            break;
+                        case 'College':
+                            url = "/surveys/collegeRemarkAdd/" + id;
+                            break;
+                        case 'Worker':
+                            url = "/surveys/workerRemarkAdd/" + id;
+                            break;
+                    }
+
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        contentType: "application/json",
+                        // 在 JSON 数据中加入 `id` 字段
+                        data: JSON.stringify({remark: remarks, id: id}),
+                        success: function() {
+                            alert('备注成功添加！');
+                            currentButton.click(); // 刷新页面以显示更改
+                        },
+                        error: function() {
+                            alert('添加备注失败，请检查API接口或网络！');
+                        }
+
+                    });
+                });
+            },
+        });
+    }
+    $('#btn-teen').click(function() { renderSurveysList('Teen'); });
+    $('#btn-college').click(function() { renderSurveysList('College'); });
+    $('#btn-worker').click(function() { renderSurveysList('Worker'); });
+
+
+</script>
+</body>
+
+</html>

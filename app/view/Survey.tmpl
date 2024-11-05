@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>心理健康问卷调查</title>
+    <link rel="stylesheet" href="/app/css/survey.css">
+    <script>
+        window.onload = function() {
+            window.currentRole = '';  // 当前加载调查的角色
+        }
+        function loadSurvey(role) {
+            window.currentRole = role;  // 记录当前加载调查的角色
+            var survey = document.getElementById("survey");
+            survey.innerHTML = ''; // 清空 survey 元素的内容
+
+            if (role === '青少年') {
+                var form = document.createElement('form');
+                form.setAttribute('id', 'teen-form');
+                form.setAttribute('onsubmit', 'submitSurvey(event)');
+
+                var questionArr = [
+                    {name: 'gender', question: '你的性别', options: ['男', '女']},
+                    {name: 'character', question: '你觉得自己的性格是哪种类型', options: ['外向型', '内向型', '双向型']},
+                    {name: 'hobby', question: '自己有无坚持下来的某种爱好', options: ['有，但是没坚持下来', '有，而且坚持下来了', '没有什么特别的爱好']},
+                    {name: 'parents_divorced', question: '父母是否离异', options: ['是', '否']},
+                    {name: 'loneliness', question: '常常感到孤独，寂寞', options: ['是', '否']},
+                    // ... 更多问题
+                    {name: 'early_love_impact', question: '觉得早恋对学习有无影响', options: ['有', '无']},
+                    {name: 'alcohol', question: '喜欢喝酒解愁', options: ['是', '否']},
+                    {name: 'problem_solving', question: '解决问题是选择的方法', options: ['自己解决', '寻求帮助', '选择逃避']},
+                    {name: 'failure', question: '当你做错某一件事时，你会有怎样的想法', options: ['觉得自己好笨', '很后悔，希望时间重来', '错了就错了，下次避免再犯']},
+                    {name: 'education_impact', question: '你觉得读书真的会决定一个人未来', options: ['不会', '会', '某种程度上']},
+                    {name: 'future_job', question: '你觉得你未来会从事什么工作', options: [], open_question: true}
+                ];
+
+                questionArr.forEach(i => {
+                    var questionElement = document.createElement('div');
+
+                    var questionTitle = document.createElement('label');
+                    questionTitle.textContent = i.question;
+                    questionElement.appendChild(questionTitle);
+
+                    if (i.open_question) {
+                        var input = document.createElement('input');
+                        input.setAttribute('type', 'text');
+                        input.setAttribute('name', i.name);
+                        questionElement.appendChild(input);
+                    } else {
+                        var select = document.createElement('select');
+                        select.setAttribute('id', i.name);
+                        select.setAttribute('name', i.name);
+                        i.options.forEach(j => {
+                            var option = document.createElement('option');
+                            option.setAttribute('value', j);
+                            option.textContent = j;
+                            select.appendChild(option);
+                        });
+                        questionElement.appendChild(select);
+                    }
+
+                    form.appendChild(questionElement);
+                });
+
+                var submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', '提交');
+                form.appendChild(submitButton);
+
+                survey.appendChild(form);
+            }
+            if (role === '大学生') {
+                var form = document.createElement('form');
+                form.setAttribute('id', 'college-form');
+                form.setAttribute('onsubmit', 'submitSurvey(event)');
+
+                var questionArr = [
+                    {name: 'grade', question: '您是大几的学生？', options: ['大一', '大二', '大三', '大四']},
+                    {name: 'gender', question: '您的性别是？', options: ['男', '女']},
+                    {name: 'birthplace', question: '您的生长地是？', options: ['城市', '乡镇', '农村', '山区']},
+                    {name: 'monthly_expense', question: '您的每月生活费是？', options: ['1000元以下', '1000到1500元', '1500到2000元', '2000到3000元', '3000元以上']},
+                    // 更多的影响程度问题
+                    {name: 'home_town', question: '对你的生长地及家乡的风俗习惯对您的心理的影响程度', options: ['0','1','2','3','4','5']},
+                    // ...
+                    {name: 'expectations', question: '对父母对您的期望过高或过低对您的心理的影响程度', options: ['0','1','2','3','4','5']},
+                    {name: 'single_child', question: '觉得是否为独生子女对您的心理的影响程度', options: ['0','1','2','3','4','5']},
+                    {name: 'future_job_expectation', question: '对未来工作的要求水平对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']},
+                    {name: 'relationship_with_classmates', question: '对和同学的关系的好坏对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']},
+                    {name: 'exam_tasks', question: '觉得学校组织的考试及各种学习任务对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']},
+                    {name: 'ability_to_handle', question: '对调节处理各种事情对自己心理影响的能力对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']},
+                    {name: 'care_about_others', question: '对是否在乎其他人的看法、想法对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']},
+                    {name: 'self_requirement', question: '对自己要求的高低对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']},
+                    {name: 'impact_by_grade', question: '对所在年级对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']},
+                    {name: 'impact_by_gender', question: '对性别对您的心理的影响程度', options: ['0', '1', '2', '3', '4', '5']}
+
+                ];
+
+                questionArr.forEach(i => {
+                    var questionElement = document.createElement('div');
+
+                    var questionTitle = document.createElement('label');
+                    questionTitle.textContent = i.question;
+                    questionElement.appendChild(questionTitle);
+
+                    var select = document.createElement('select');
+                    select.setAttribute('id', i.name);
+                    select.setAttribute('name', i.name);
+                    i.options.forEach(j => {
+                        var option = document.createElement('option');
+                        option.setAttribute('value', j);
+                        option.textContent = j;
+                        select.appendChild(option);
+                    });
+                    questionElement.appendChild(select);
+
+                    form.appendChild(questionElement);
+                });
+
+                var submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', '提交');
+                form.appendChild(submitButton);
+
+                survey.appendChild(form);
+            }
+            if (role === '社会工作者') {
+                var form = document.createElement('form');
+                form.setAttribute('id', 'worker-form');
+                form.setAttribute('onsubmit', 'submitSurvey(event)');
+
+                var questionArr = [
+                    {name: 'work_unit', question: 'Q1：您的工作单位是', options: [], open_question: true},
+                    {name: 'gender', question: 'Q2：性别', options: ['男', '女']},
+                    {name: 'age', question: 'Q3：年龄', options: ['25岁及以下', '26-30', '31-40', '40-50', '51岁及以上']},
+                    {name: 'marital_status', question: 'Q4：婚姻状况', options: ['单身', '已婚']},
+                    {name: 'education_level', question: 'Q5：受教育程度', options: ['中专及以下', '大专', '本科', '硕士及以上']},
+                    {name: 'professional_title', question: 'Q6：职称', options: ['无职称', '初级', '中级', '副高级', '正高级']},
+                    {name: 'department', question: 'Q7：工作所属部门', options: ['技术研发部', '生产部', '质检部', '工程部', '其他']},
+                    {name: 'work_years', question: 'Q8：工作年限', options: ['1年及以下', '2-3年', '4-6年', '7-10年', '11年及以上', '21年及以上']},
+                    {name: 'enterprise_nature', question: 'Q9：企业性质', options: ['国有企业', '集体所有制企业', '私营企业', '股份制企业', '联营企业', '外商投资企业', '港、澳、台投资企业', '股份合作企业']},                ];
+
+                questionArr.forEach(i => {
+                    var questionElement = document.createElement('div');
+
+                    var questionTitle = document.createElement('label');
+                    questionTitle.textContent = i.question;
+                    questionElement.appendChild(questionTitle);
+
+                    if (i.open_question) {
+                        var input = document.createElement('input');
+                        input.setAttribute('type', 'text');
+                        input.setAttribute('name', i.name);
+                        questionElement.appendChild(input);
+                    } else {
+                        var select = document.createElement('select');
+                        select.setAttribute('id', i.name);
+                        select.setAttribute('name', i.name);
+                        i.options.forEach(j => {
+                            var option = document.createElement('option');
+                            option.setAttribute('value', j);
+                            option.textContent = j;
+                            select.appendChild(option);
+                        });
+                        questionElement.appendChild(select);
+                    }
+
+                    form.appendChild(questionElement);
+                });
+
+                var submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', '提交');
+                form.appendChild(submitButton);
+
+                survey.appendChild(form);
+
+
+            // 根据需要，这里可以添加更多的角色和对应的问卷
+        }}
+
+        // form.setAttribute('onsubmit', 'submitSurvey(event)');//点击提交按钮提交表单
+
+        function submitSurvey(event) {
+            // 为了避免页面重载，阻止表单的默认提交行为
+            event.preventDefault();
+
+            var formData = new FormData(event.target);
+            var data = {};
+
+            // 收集表单数据
+            for (var pair of formData.entries()) {
+                data[pair[0]] = pair[1];
+            }
+
+            console.log(data); // 在控制台打印提交的数据，以便查看和调试
+
+            // 您需要设置您自己后端服务器的地址
+            var Url;
+            switch(window.currentRole) {
+                case "青少年":
+                    Url = '/user/submitTeenSurvey';
+                    break;
+                case "大学生":
+                    Url = '/user/submitCollegeSurvey';
+                    break;
+                case "社会工作者":
+                    Url = '/user/submitWorkerSurvey';
+                    break;
+            }
+
+            // 使用 fetch API 发送 JSON 数据
+            fetch(Url, {
+                method: 'POST', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => response.json())  // 使用 JSON 解析响应
+                .then(data => {
+                    console.log('Success:', data);  // 处理成功时，打印返回的数据
+                    alert('已提交问卷，感谢您的参与！');
+                })
+                .catch((error) => {
+                    console.error('Error:', error); // 处理失败时，打印错误信息
+                    alert('很抱歉，提交问卷失败~');
+                });
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>心理健康问卷调查</h1>
+        <a id="my-survey" href="/user/surveys">我的问卷</a>  <!-- 添加"我的问卷"链接 -->
+    </header>
+
+    <section id="roles">
+        <h2>角色选择</h2>
+
+        <button class="custom-btn" onclick="loadSurvey('青少年')">青少年</button>
+        <button class="custom-btn" onclick="loadSurvey('大学生')">大学生</button>
+        <button class="custom-btn" onclick="loadSurvey('社会工作者')">社会工作者</button>
+    </section>
+
+    <section id="survey">
+        <!-- 问卷内容将在这里显示 -->
+    </section>
+
+    <footer>
+        <p>©2024 心理健康数据分析与预测平台. All rights reserved.</p>
+    </footer>
+</div>
+</body>
+</html>

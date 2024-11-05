@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@latest/dist/echarts.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/world.js"></script>
+    <style>
+        #mapid {
+            height: 80%;
+            width: 80%;
+            margin: auto;
+        }
+    </style>
+    <title>数据来源分布图</title>
+</head>
+<body style="height: 100%; margin: 0">
+<div id="mapid"></div>
+<script type="text/javascript">
+
+    var dom = document.getElementById("mapid");
+    var myChart = echarts.init(dom);
+    var app = {};
+    var data = {
+        "United States": 22180,
+        "Poland": 271,
+        "Australia": 1082,
+        "Canada": 2433,
+        "United Kingdom": 4324,
+        "South Africa": 271,
+        "Sweden": 542,
+        "New Zealand": 270,
+        "Netherlands": 270,
+        "India": 270,
+        "Belgium": 270,
+        "Iceland": 540
+    };
+
+    var mapdata= [];
+    for (var country in data) {
+        if (data.hasOwnProperty(country)) {
+            mapdata.push({name: country, value:data[country]});
+        }
+    }
+
+    option = {
+        title: {
+            text: '数据来源分布图',
+            subtext: '国家热图',
+            left: 'center',
+            top: 'top',
+            textStyle: {
+                color: '#000',
+                fontSize: 24
+            }
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: function(params) {
+                return params.name + ' : ' + params.value;
+            }
+        },
+        visualMap: {        min: 0,
+            max: 23000,
+            text: ['High', 'Low'],
+            realtime: false,
+            calculable: true,
+            inRange:{
+                color:['#63B8FF', '#0000FF']
+            }
+        },
+        geo: {
+            map: 'world',
+            label: {
+                show: false,
+            },
+            roam: true,
+            emphasis: {
+                label: {
+                    show: false,
+                }
+            },
+            itemStyle: {
+                normal: {
+                    areaColor: '#eee'
+                },
+                emphasis: {
+                    areaColor: '#ccc'
+                }
+            }
+        },
+        series: [{
+            name: "Countries",
+            type: 'map',
+            roam: true,
+            map: 'world',
+            emphasis: {
+                label:{
+                    show:true,
+                    color: '#fff'
+                },
+                itemStyle: {
+                    areaColor: '#46bee9'
+                }
+            },
+            data: mapdata,
+        }
+        ]
+    };
+
+    if (option && typeof option === 'object') {
+        myChart.setOption(option);
+    }
+    // resize the chart when the window size changes
+    window.onresize = function() {
+        myChart.resize();
+    }
+</script>
+</body>
+</html>
